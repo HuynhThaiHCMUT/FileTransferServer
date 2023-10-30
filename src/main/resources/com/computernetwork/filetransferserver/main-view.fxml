@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" style="-fx-background-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.computernetwork.filetransferserver.MainController">
+   <children>
+      <TextArea fx:id="output" editable="false" style="-fx-background-color: black; -fx-text-fill: white;" styleClass="textArea" wrapText="true" VBox.vgrow="ALWAYS">
+         <font>
+            <Font size="16.0" />
+         </font></TextArea>
+      <HBox alignment="CENTER_LEFT">
+         <children>
+            <Label style="-fx-text-fill: white;" text="&gt;">
+               <font>
+                  <Font size="16.0" />
+               </font>
+               <padding>
+                  <Insets left="5.0" />
+               </padding>
+            </Label>
+            <TextField fx:id="input" onKeyPressed="#onKeyPress" style="-fx-background-color: black; -fx-text-fill: white; -fx-text-box-border: black;" HBox.hgrow="ALWAYS">
+               <font>
+                  <Font size="16.0" />
+               </font>
+               <padding>
+                  <Insets bottom="5.0" right="5.0" top="5.0" />
+               </padding>
+            </TextField>
+         </children>
+      </HBox>
+   </children>
+</VBox>
