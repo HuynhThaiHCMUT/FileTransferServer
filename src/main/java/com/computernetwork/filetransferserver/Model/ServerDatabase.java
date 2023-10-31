@@ -4,7 +4,7 @@ import java.sql.*;
 import java.util.ArrayList;
 
 public class ServerDatabase {
-    private Connection connection;
+    private final Connection connection;
     public ServerDatabase() throws SQLException {
         connection = DriverManager.getConnection("jdbc:sqlite:ServerDatabase.db");
         System.out.println("Connected to the database.");
@@ -47,7 +47,7 @@ public class ServerDatabase {
         PreparedStatement ps = connection.prepareStatement("SELECT * FROM user_data WHERE name = ?");
         ps.setString(1, username);
         ResultSet row = ps.executeQuery();
-        String userName = row.getString("name");
+        String s = row.getString("name");
         if(row.wasNull()) return false;
         row.updateString("ip", ipAddress);
         row.updateRow();
@@ -61,7 +61,7 @@ public class ServerDatabase {
         PreparedStatement ps = connection.prepareStatement("SELECT * FROM user_data WHERE name = ?");
         ps.setString(1, username);
         ResultSet row = ps.executeQuery();
-        String userName = row.getString("name");
+        String s = row.getString("name");
 
         if(!row.wasNull()) return false;
         
@@ -79,7 +79,7 @@ public class ServerDatabase {
         ps.setString(1, fileData.getName());
         ps.setString(2, fileData.getOwner());
         ResultSet row = ps.executeQuery();
-        String fileName = row.getString("name");
+        String s = row.getString("name");
 
         if(!row.wasNull()) return false;
         
@@ -96,12 +96,12 @@ public class ServerDatabase {
     /**
      * Query file by name
      */
-    public ArrayList<FileData> queryFile(String query) throws SQLException {
+    public ArrayList<FileData> searchFile(String query) throws SQLException {
         PreparedStatement ps = connection.prepareStatement("SELECT * FROM file_data WHERE name LIKE %?%");
         ps.setString(1, query);
         ResultSet row = ps.executeQuery();
 
-        ArrayList<FileData> fileList = new ArrayList<FileData>();
+        ArrayList<FileData> fileList = new ArrayList<>();
 
         while(row.next()) {
             String name = row.getString("name");
@@ -126,9 +126,7 @@ public class ServerDatabase {
 
         PreparedStatement ps2 = connection.prepareStatement("INSERT INTO file_data VALUES (?,?,?,?,?)");
 
-        for(int i = 0; i < fileData.size(); i++) {
-            FileData file = fileData.get(i);
-
+        for (FileData file : fileData) {
             ps2.setString(1, file.getName());
             ps2.setLong(2, file.getSize());
             ps2.setString(3, file.getDescription());
