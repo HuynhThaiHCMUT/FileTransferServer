@@ -6,16 +6,14 @@ import javafx.scene.control.TextArea;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class NetworkListener {
-    private LocalDatabase database;
+    private ServerDatabase database;
     private TextArea output;
 
-    public NetworkListener(LocalDatabase database, TextArea output) {
+    public NetworkListener(ServerDatabase database, TextArea output) {
         this.database = database;
         this.output = output;
     }

@@ -1,10 +1,8 @@
 package com.computernetwork.filetransferserver;
 
-import com.computernetwork.filetransferserver.Model.LocalDatabase;
+import com.computernetwork.filetransferserver.Model.ServerDatabase;
 import com.computernetwork.filetransferserver.Model.NetworkListener;
 import com.computernetwork.filetransferserver.Model.NetworkSender;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
@@ -12,15 +10,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.sql.SQLException;
 
 public class MainController {
-    private LocalDatabase database;
+    private ServerDatabase database;
     private NetworkListener listener;
     private NetworkSender sender;
     @FXML
@@ -30,7 +23,7 @@ public class MainController {
     @FXML
     private void initialize() {
         try {
-            database = new LocalDatabase();
+            database = new ServerDatabase();
         } catch (SQLException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Database Error");
