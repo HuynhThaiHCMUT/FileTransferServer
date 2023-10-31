@@ -6,18 +6,18 @@ public class FileData {
     private String name;
     private Long size;
     private String description;
-    private Date uploadedDate;
+    private String uploadedDate;
     private String owner;
 
     public FileData(String name, Long size, String description, String owner) {
         this.name = name;
         this.size = size;
         this.description = description;
-        uploadedDate = new Date(new java.util.Date().getTime());
+        uploadedDate = new java.util.Date().toString();
         this.owner = owner;
     }
 
-    public FileData(String name, Long size, String description, Date uploadedDate, String owner) {
+    public FileData(String name, Long size, String description, String uploadedDate, String owner) {
         this.name = name;
         this.size = size;
         this.description = description;
@@ -49,11 +49,11 @@ public class FileData {
         this.description = description;
     }
 
-    public Date getUploadedDate() {
+    public String getUploadedDate() {
         return uploadedDate;
     }
 
-    public void setUploadedDate(Date uploadedDate) {
+    public void setUploadedDate(String uploadedDate) {
         this.uploadedDate = uploadedDate;
     }
 
