@@ -35,8 +35,11 @@ public class ServerDatabase {
         PreparedStatement ps = connection.prepareStatement("SELECT ip FROM user_data WHERE name = ?");
         ps.setString(1, username);
         ResultSet row = ps.executeQuery();
-        String userIP = row.getString("ip");
-        if(!row.wasNull()) return userIP;
+
+        if (row.next()) {
+            String userIP = row.getString("ip");
+            return userIP;
+        }
         return null;
     }
 
@@ -47,11 +50,21 @@ public class ServerDatabase {
         PreparedStatement ps = connection.prepareStatement("SELECT * FROM user_data WHERE name = ?");
         ps.setString(1, username);
         ResultSet row = ps.executeQuery();
-        String s = row.getString("name");
-        if(row.wasNull()) return false;
-        row.updateString("ip", ipAddress);
-        row.updateRow();
-        return true;
+        if (row.next()) {
+            String s = row.getString("name");
+            if (s != null) {
+                String updateSql = "UPDATE user_data SET ip = ? WHERE name = ?";
+                PreparedStatement updateStatement = connection.prepareStatement(updateSql);
+                updateStatement.setString(1, ipAddress);
+                updateStatement.setString(2, username);
+                int rowsUpdated = updateStatement.executeUpdate();
+
+                if (rowsUpdated > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -61,57 +74,64 @@ public class ServerDatabase {
         PreparedStatement ps = connection.prepareStatement("SELECT * FROM user_data WHERE name = ?");
         ps.setString(1, username);
         ResultSet row = ps.executeQuery();
-        String s = row.getString("name");
 
-        if(!row.wasNull()) return false;
-        
-        row.moveToInsertRow();
-        row.updateString("name", username);
-        row.updateString("ip", ipAddress);
-        row.insertRow();
+        if (row.next()) {
+            String s = row.getString("name");
+
+            if (!row.wasNull()) {
+                return false;
+            }
+        }
+
+        // If the row doesn't exist, or the "name" column was NULL, insert a new row
+        PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO user_data (name, ip) VALUES (?, ?)");
+        insertStatement.setString(1, username);
+        insertStatement.setString(2, ipAddress);
+        insertStatement.executeUpdate();
+
         return true;
     }
     /**
      * Insert a new file data record in file_data, return true if successful, false if file already exist under the same owner
      */
-    public boolean insertFile(FileData fileData) throws SQLException {
+    public boolean insertFile(ServerFileData fileData) throws SQLException {
         PreparedStatement ps = connection.prepareStatement("SELECT * FROM file_data WHERE name = ? AND owner = ?");
         ps.setString(1, fileData.getName());
         ps.setString(2, fileData.getOwner());
         ResultSet row = ps.executeQuery();
-        String s = row.getString("name");
 
-        if(!row.wasNull()) return false;
-        
-        row.moveToInsertRow();
-        row.updateString("name", fileData.getName());
-        row.updateLong("file_size", fileData.getSize());
-        row.updateString("description", fileData.getDescription());
-        row.updateString("date", fileData.getUploadedDate().toString());
-        row.updateString("owner", fileData.getOwner());
-        row.insertRow();
+        if (row.next()) return false;
+
+        PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO file_data (name, file_size, description, date, owner) VALUES (?, ?, ?, ?, ?)");
+        insertStatement.setString(1, fileData.getName());
+        insertStatement.setLong(2, fileData.getSize());
+        insertStatement.setString(3, fileData.getDescription());
+        insertStatement.setString(4, fileData.getUploadedDate().toString());
+        insertStatement.setString(5, fileData.getOwner());
+        insertStatement.executeUpdate();
+
         return true;
     }
 
     /**
-     * Query file by name
+     * Search for file by name
      */
-    public ArrayList<FileData> searchFile(String query) throws SQLException {
-        PreparedStatement ps = connection.prepareStatement("SELECT * FROM file_data WHERE name LIKE %?%");
-        ps.setString(1, query);
+    public ArrayList<ServerFileData> searchFile(String query, String username) throws SQLException {
+        PreparedStatement ps = connection.prepareStatement("SELECT * FROM file_data WHERE name LIKE ?"); // AND owner <> ?
+        ps.setString(1, "%" + query + "%");
+        //ps.setString(2, username); TODO: Add this back
         ResultSet row = ps.executeQuery();
 
-        ArrayList<FileData> fileList = new ArrayList<>();
+        ArrayList<ServerFileData> fileList = new ArrayList<>();
 
         while(row.next()) {
             String name = row.getString("name");
-            Long file_size = row.getLong("file_size");
+            long file_size = row.getLong("file_size");
             String description = row.getString("description");
             Date date = Date.valueOf(row.getString("date"));
             String owner = row.getString("owner");
 
-            FileData fileData = new FileData(name, file_size, description, date, owner);
-
+            ServerFileData fileData = new ServerFileData(name, file_size, description, date, owner);
             fileList.add(fileData);
         }
         return fileList;
@@ -119,14 +139,14 @@ public class ServerDatabase {
     /**
      * Update file date of a specific user, delete all old file data and insert the new one
      */
-    public boolean updateFile(ArrayList<FileData> fileData, String owner) throws SQLException {
+    public boolean updateFile(ArrayList<ServerFileData> fileData, String owner) throws SQLException {
         PreparedStatement ps1 = connection.prepareStatement("DELETE FROM file_data WHERE owner = ?");
         ps1.setString(1, owner);
         ps1.executeQuery();
 
         PreparedStatement ps2 = connection.prepareStatement("INSERT INTO file_data VALUES (?,?,?,?,?)");
 
-        for (FileData file : fileData) {
+        for (ServerFileData file : fileData) {
             ps2.setString(1, file.getName());
             ps2.setLong(2, file.getSize());
             ps2.setString(3, file.getDescription());

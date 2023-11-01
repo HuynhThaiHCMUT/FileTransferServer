@@ -2,14 +2,14 @@ package com.computernetwork.filetransferserver.Model;
 
 import java.sql.Date;
 
-public class FileData {
+public class ServerFileData {
     private String name;
     private Long size;
     private String description;
     private Date uploadedDate;
     private String owner;
 
-    public FileData(String name, Long size, String description, String owner) {
+    public ServerFileData(String name, Long size, String description, String owner) {
         this.name = name;
         this.size = size;
         this.description = description;
@@ -17,7 +17,7 @@ public class FileData {
         this.owner = owner;
     }
 
-    public FileData(String name, Long size, String description, Date uploadedDate, String owner) {
+    public ServerFileData(String name, Long size, String description, Date uploadedDate, String owner) {
         this.name = name;
         this.size = size;
         this.description = description;

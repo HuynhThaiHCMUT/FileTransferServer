@@ -13,92 +13,82 @@ public class NetworkSender {
         return new Task<Respond>() {
             @Override
             protected Respond call() throws Exception {
-                Socket socket = new Socket(userIP, 4040);
+                Socket socket = new Socket(userIP, 4041);
                 DataInputStream istream = new DataInputStream(socket.getInputStream());
                 DataOutputStream ostream = new DataOutputStream(socket.getOutputStream());
 
-                ostream.writeShort(0);
+                socket.setSoTimeout(5000);
 
-                int usernameLength = username.length();
-                ostream.writeShort(usernameLength);
-                ostream.writeUTF(username);
+                try {
+                    ostream.writeShort(0);
+                    ostream.writeUTF(username);
 
-                short respondCode = istream.readShort();
-                Respond respondmsg = new Respond(false, null);
-                if (respondCode >= 100 && respondCode < 600) {
-
+                    short respondCode = istream.readShort();
+                    Respond respond = new Respond(false, null);
                     if (respondCode == 200) {
-                        respondmsg.setSuccess(true);
-                        respondmsg.setMessage("Client is now online");
+                        respond.setSuccess(true);
+                        respond.setMessage("Client is online");
+                    } else if (respondCode == 401) {
+                        respond.setMessage(username + "doesn't match with " + userIP);
+                    } else{
+                        respond.setMessage("Invalid respond code: " + respondCode);
                     }
-                    else if (respondCode == 401) {
-                        respondmsg.setMessage(username + "doesn't match with " + userIP);
-                    }
-                }
-                else{
-                    respondmsg.setMessage("Invalid respondcode");
-                }
-                socket.close();
 
-                return respondmsg;
+                    socket.close();
+                    return respond;
+                } catch (SocketTimeoutException e) {
+                    socket.close();
+                    throw new SocketTimeoutException("Request timed out");
+                }
             }
         };
     }
-    public static Task<ArrayList<FileData>> discover(String userIP, String username) {
-        return new Task<ArrayList<FileData>>() {
+    public static Task<Respond> discover(String userIP, String username, ArrayList<ClientFileData> fileList) {
+        return new Task<Respond>() {
             @Override
-            protected ArrayList<FileData> call() throws Exception {
-                Socket socket = new Socket(userIP, 4040);
+            protected Respond call() throws Exception {
+                Socket socket = new Socket(userIP, 4041);
                 DataInputStream istream = new DataInputStream(socket.getInputStream());
                 DataOutputStream ostream = new DataOutputStream(socket.getOutputStream());
 
-                ostream.writeShort(6);
+                socket.setSoTimeout(5000);
 
-                int usernameLength = username.length();
-                ostream.writeShort(usernameLength);
-                ostream.writeUTF(username);
+                try {
+                    ostream.writeShort(6);
+                    ostream.writeUTF(username);
 
-                short respondCode = istream.readShort();
-
-                ArrayList<FileData> fileDatalist = new ArrayList<FileData>(null);
-                if (respondCode>= 100 && respondCode <600) {
-                    istream.readShort();
-
+                    short respondCode = istream.readShort();
+                    Respond respond = new Respond(false, null);
                     if (respondCode == 200) {
+                        respond.setSuccess(true);
+                        respond.setMessage("Discover successful");
                         short fileCount = istream.readShort();
 
-                        byte[] buffer;
                         long fileSize;
-                        short fileNameLength;
                         String filename;
-                        short fileDescriptionLength;
                         String fileDescription;
-                        short localFilenameLength;
                         String localFilename;
 
                         for(int i = 0; i<fileCount; i++){
                             fileSize = istream.readLong();
+                            filename = istream.readUTF();
+                            fileDescription = istream.readUTF();
+                            localFilename = istream.readUTF();
 
-                            fileNameLength = istream.readShort();
-                            buffer = istream.readNBytes(fileNameLength);
-                            filename = new String(buffer, StandardCharsets.UTF_8);
-
-                            fileDescriptionLength = istream.readShort();
-                            buffer = istream.readNBytes(fileDescriptionLength);
-                            fileDescription = new String(buffer, StandardCharsets.UTF_8);
-
-                            localFilenameLength = istream.readShort();
-                            buffer = istream.readNBytes(localFilenameLength);
-                            localFilename = new String(buffer, StandardCharsets.UTF_8);
-
-                            FileData file = new FileData(filename, fileSize, fileDescription, username);
-                            fileDatalist.add(file);
+                            ClientFileData file = new ClientFileData(filename, fileSize, fileDescription, localFilename);
+                            fileList.add(file);
                         }
-
-                    }  
-                }  
-                socket.close();
-                return fileDatalist;
+                    } else if (respondCode == 401) {
+                        respond.setMessage(username + "doesn't match with " + userIP);
+                    } else{
+                        respond.setMessage("Invalid respond code: " + respondCode);
+                    }
+                    socket.close();
+                    return respond;
+                } catch (SocketTimeoutException e) {
+                    socket.close();
+                    throw new SocketTimeoutException("Request timed out");
+                }
             }
         };
     }
