@@ -206,7 +206,7 @@ public class NetworkListener {
                     //TODO: Do something with file name
 
                     String userIP = database.getUserIP(username);
-                    NetworkSender.discover(userIP);
+                    NetworkSender.discover(userIP, username);
                 default:
                     return clientIP + " sent an invalid request (msgType = " + msgType +") as " + username + "\n";
             }
