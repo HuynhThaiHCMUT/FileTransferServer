@@ -6,8 +6,10 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class ServerApplication extends Application {
+    private MainController controller;
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(ServerApplication.class.getResource("main-view.fxml"));
@@ -15,6 +17,17 @@ public class ServerApplication extends Application {
         stage.setTitle("FileTransfer Server");
         stage.setScene(scene);
         stage.show();
+
+        controller = fxmlLoader.getController();
+    }
+
+    @Override
+    public void stop() {
+        try {
+            controller.onClose();
+        } catch (SQLException | IOException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public static void main(String[] args) {

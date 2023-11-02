@@ -16,7 +16,6 @@ import java.util.ArrayList;
 public class MainController {
     private ServerDatabase database;
     private NetworkListener listener;
-    private NetworkSender sender;
     @FXML
     private TextField input;
     @FXML
@@ -50,11 +49,7 @@ public class MainController {
         switch (tokens[0]) {
             case "start":
                 if (listener.isStarted()) return "Server already started";
-                try {
-                    listener.start();
-                } catch (IOException e) {
-                    return ("Failed to start listener: " + e.getMessage());
-                }
+                listener.start();
                 return "Starting server...";
             case "ping":
                 if (tokens.length == 1) return "Not enough parameters";
@@ -63,12 +58,8 @@ public class MainController {
                     if (userIP == null) return "Username does not exist";
                     output.appendText("Pinging " + userIP + "\n");
                     Task<Respond> task = NetworkSender.ping(userIP, tokens[1]);
-                    task.setOnSucceeded(event -> {
-                        output.appendText(task.getValue().getMessage() + "\n");
-                    });
-                    task.setOnFailed(event -> {
-                        output.appendText("Failed to ping user: " + task.getException().getMessage() + "\n");
-                    });
+                    task.setOnSucceeded(event -> output.appendText(task.getValue().getMessage() + "\n"));
+                    task.setOnFailed(event -> output.appendText("Failed to ping user: " + task.getException().getMessage() + "\n"));
                     Thread t = new Thread(task);
                     t.setDaemon(true);
                     t.start();
@@ -89,13 +80,16 @@ public class MainController {
                             for (ClientFileData file: fileList) {
                                 output.appendText(file.getName() + " " + file.getSize() + " " + file.getDescription() + " " + file.getFileLocation() + "\n");
                             }
+                            try {
+                                database.checkFile(tokens[1], fileList);
+                            } catch (SQLException e) {
+                                output.appendText("Failed to update database\n");
+                            }
                         } else {
                             output.appendText("Discover failed: " + task.getValue().getMessage() + "\n");
                         }
                     });
-                    task.setOnFailed(event -> {
-                        output.appendText("Discover failed: " + task.getException().getMessage() + "\n");
-                    });
+                    task.setOnFailed(event -> output.appendText("Discover failed: " + task.getException().getMessage() + "\n"));
                     Thread t = new Thread(task);
                     t.setDaemon(true);
                     t.start();
@@ -103,10 +97,14 @@ public class MainController {
                 } catch (SQLException e) {
                     return "Error while getting userIP from username";
                 }
-                //TODO: Add more command
-
+            case "stop":
+                listener.stop();
+                return "Server stopped";
             default:
                 return "Invalid command";
         }
+    }
+    public void onClose() throws SQLException, IOException {
+        if (database != null) database.close();
     }
 }

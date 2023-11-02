@@ -9,30 +9,30 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 public class NetworkListener {
-    private ServerDatabase database;
-    private TextArea output;
+    private final ServerDatabase database;
+    private final TextArea output;
+    public ServerSocket socket;
     private boolean started;
     public NetworkListener(ServerDatabase database, TextArea output) {
         this.database = database;
         this.output = output;
         started = false;
     }
-    public void start() throws IOException {
-        ServerSocket socket = new ServerSocket(4040);
+    public void start() {
+        try {
+            socket = new ServerSocket(4040);
+        } catch (IOException e) {
+            output.appendText("Error while starting server: " + e.getMessage());
+            return;
+        }
         Task<String> startTask = new Task<>() {
             @Override
             protected String call() throws Exception {
                 started = true;
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        output.appendText("Server started, waiting for connection\n");
-                    }
-                });
+                Platform.runLater(() -> output.appendText("Server started, waiting for connection\n"));
                 while (!isCancelled()) {
                     Socket newClient = socket.accept();
                     ListenerTask task = new ListenerTask(newClient);
@@ -146,11 +146,22 @@ public class NetworkListener {
                     ostream.writeShort(200);
                     ostream.writeShort(fileArray.size());
                     for (ServerFileData file: fileArray) {
-                        ostream.writeUTF(file.getOwner());
-                        ostream.writeLong(file.getSize());
-                        ostream.writeUTF(file.getName());
-                        ostream.writeUTF(file.getDescription());
-                        ostream.writeLong(file.getUploadedDate().getTime());
+                        String userIP = database.getUserIP(file.getOwner());
+                        if (userIP != null) {
+                            Respond respond;
+                            try {
+                                respond = NetworkSender.blockingPing(userIP, username);
+                            } catch (IOException e) {
+                                respond = new Respond(false, null);
+                            }
+                            ostream.writeUTF(file.getOwner());
+                            ostream.writeUTF(userIP);
+                            ostream.writeBoolean(respond.isSuccess());
+                            ostream.writeLong(file.getSize());
+                            ostream.writeUTF(file.getName());
+                            ostream.writeUTF(file.getDescription());
+                            ostream.writeLong(file.getUploadedDate().getTime());
+                        }
                     }
                     return clientIP + " sent a search request with query = " + query + " as " + username + "\n" +
                             "Returned " + fileArray.size() + " search result(s)\n";
@@ -165,23 +176,20 @@ public class NetworkListener {
 
                     ostream.writeShort(200);
                     ArrayList<ClientFileData> fileList = new ArrayList<>();
-                    Task<Respond> task = NetworkSender.discover(userIP, username, fileList);
-                    task.setOnSucceeded(event -> {
-                        if (task.getValue().isSuccess()) {
+                    try {
+                        Respond respond = NetworkSender.blockingDiscover(userIP, username, fileList);
+                        if (respond.isSuccess()) {
                             output.appendText("Discover successful, returned file list:\n");
                             for (ClientFileData file: fileList) {
                                 output.appendText(file.getName() + " " + file.getSize() + " " + file.getDescription() + " " + file.getFileLocation() + "\n");
                             }
+                            database.checkFile(username, fileList);
                         } else {
-                            output.appendText("Discover failed: " + task.getValue().getMessage() + "\n");
+                            output.appendText("Discover failed: " + respond.getMessage() + "\n");
                         }
-                    });
-                    task.setOnFailed(event -> {
-                        output.appendText("Discover failed: " + task.getException().getMessage() + "\n");
-                    });
-                    Thread t = new Thread(task);
-                    t.setDaemon(true);
-                    t.start();
+                    } catch (IOException e) {
+                        output.appendText("Discover failed: " + e.getMessage() + "\n");
+                    }
                     return clientIP + " sent a report missing request: " + username + " is missing file " + reportedFileName + "\n" +
                             "Sending a discover request, to " + userIP +"\n";
                 default:
@@ -211,7 +219,16 @@ public class NetworkListener {
         }
     }
 
+    public void stop() {
+        try {
+            socket.close();
+        } catch (IOException e) {
+            output.appendText("Error while closing socket: " + e.getMessage());
+        }
+    }
+
     public boolean isStarted() {
         return started;
     }
+
 }

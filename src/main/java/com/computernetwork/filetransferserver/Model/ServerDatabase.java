@@ -1,6 +1,12 @@
 package com.computernetwork.filetransferserver.Model;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 public class ServerDatabase {
@@ -37,8 +43,7 @@ public class ServerDatabase {
         ResultSet row = ps.executeQuery();
 
         if (row.next()) {
-            String userIP = row.getString("ip");
-            return userIP;
+            return row.getString("ip");
         }
         return null;
     }
@@ -59,9 +64,7 @@ public class ServerDatabase {
                 updateStatement.setString(2, username);
                 int rowsUpdated = updateStatement.executeUpdate();
 
-                if (rowsUpdated > 0) {
-                    return true;
-                }
+                return rowsUpdated > 0;
             }
         }
         return false;
@@ -75,15 +78,9 @@ public class ServerDatabase {
         ps.setString(1, username);
         ResultSet row = ps.executeQuery();
 
-        if (row.next()) {
-            String s = row.getString("name");
+        if (row.next()) return false;
 
-            if (!row.wasNull()) {
-                return false;
-            }
-        }
-
-        // If the row doesn't exist, or the "name" column was NULL, insert a new row
+        // If the row doesn't exist, insert a new row
         PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO user_data (name, ip) VALUES (?, ?)");
         insertStatement.setString(1, username);
         insertStatement.setString(2, ipAddress);
@@ -117,9 +114,9 @@ public class ServerDatabase {
      * Search for file by name
      */
     public ArrayList<ServerFileData> searchFile(String query, String username) throws SQLException {
-        PreparedStatement ps = connection.prepareStatement("SELECT * FROM file_data WHERE name LIKE ?"); // AND owner <> ?
+        PreparedStatement ps = connection.prepareStatement("SELECT * FROM file_data WHERE name LIKE ? AND owner <> ?");
         ps.setString(1, "%" + query + "%");
-        //ps.setString(2, username); TODO: Add this back
+        ps.setString(2, username);
         ResultSet row = ps.executeQuery();
 
         ArrayList<ServerFileData> fileList = new ArrayList<>();
@@ -136,25 +133,24 @@ public class ServerDatabase {
         }
         return fileList;
     }
+
     /**
-     * Update file date of a specific user, delete all old file data and insert the new one
+     * go through the list of file of a user, delete them from the file_data table if they're no longer exist
      */
-    public boolean updateFile(ArrayList<ServerFileData> fileData, String owner) throws SQLException {
-        PreparedStatement ps1 = connection.prepareStatement("DELETE FROM file_data WHERE owner = ?");
-        ps1.setString(1, owner);
-        ps1.executeQuery();
+    public void checkFile(String username, ArrayList<ClientFileData> fileList) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement("DELETE FROM file_data WHERE owner = ?");
+        statement.setString(1, username);
+        statement.executeUpdate();
 
-        PreparedStatement ps2 = connection.prepareStatement("INSERT INTO file_data VALUES (?,?,?,?,?)");
+        for (ClientFileData file: fileList) {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO file_data VALUES (?,?,?,?,?)");
+            ps.setString(1, file.getName());
+            ps.setLong(2, file.getSize());
+            ps.setString(3, file.getDescription());
+            ps.setString(4, file.getUploadedDate().toString());
+            ps.setString(5, username);
 
-        for (ServerFileData file : fileData) {
-            ps2.setString(1, file.getName());
-            ps2.setLong(2, file.getSize());
-            ps2.setString(3, file.getDescription());
-            ps2.setString(4, file.getUploadedDate().toString());
-            ps2.setString(5, file.getOwner());
-
-            ps2.executeQuery();
+            ps.executeUpdate();
         }
-        return true;
     }
 }
