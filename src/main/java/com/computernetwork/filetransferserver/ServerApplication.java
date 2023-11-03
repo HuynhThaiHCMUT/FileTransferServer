@@ -29,8 +29,4 @@ public class ServerApplication extends Application {
             System.out.println(e.getMessage());
         }
     }
-
-    public static void main(String[] args) {
-        launch();
-    }
 }

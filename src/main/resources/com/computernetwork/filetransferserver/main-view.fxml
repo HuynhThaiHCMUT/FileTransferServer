@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" style="-fx-background-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.computernetwork.filetransferserver.MainController">
+<VBox alignment="CENTER" style="-fx-background-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17.0.9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.computernetwork.filetransferserver.MainController">
    <children>
       <TextArea fx:id="output" editable="false" style="-fx-background-color: black; -fx-text-fill: white;" styleClass="textArea" wrapText="true" VBox.vgrow="ALWAYS">
          <font>

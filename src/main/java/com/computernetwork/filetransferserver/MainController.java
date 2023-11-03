@@ -12,6 +12,8 @@ import javafx.scene.input.KeyEvent;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainController {
     private ServerDatabase database;
@@ -32,7 +34,9 @@ public class MainController {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
+        output.appendText("Type help for a list of command\n");
         listener = new NetworkListener(database, output);
+        listener.start();
     }
     @FXML
     private void onKeyPress(KeyEvent event) {
@@ -44,20 +48,28 @@ public class MainController {
         }
     }
     private String process(String cmd) {
-        String[] tokens = cmd.split(" ");
-        if (tokens.length == 0) return null;
-        switch (tokens[0]) {
+        ArrayList<String> tokens = splitTokens(cmd);
+        if (tokens.isEmpty()) return null;
+        switch (tokens.get(0)) {
+            case "help":
+                return """
+                        Command format: command "parameter1" "parameter2" ...
+                        List of command:
+                        start: start the server
+                        stop: stop the server
+                        ping "hostname": check if the host with hostname is online
+                        discover "hostname": check the local files of host hostname""";
             case "start":
                 if (listener.isStarted()) return "Server already started";
                 listener.start();
                 return "Starting server...";
             case "ping":
-                if (tokens.length == 1) return "Not enough parameters";
+                if (tokens.size() == 1) return "Not enough parameters";
                 try {
-                    String userIP = database.getUserIP(tokens[1]);
+                    String userIP = database.getUserIP(tokens.get(1));
                     if (userIP == null) return "Username does not exist";
                     output.appendText("Pinging " + userIP + "\n");
-                    Task<Respond> task = NetworkSender.ping(userIP, tokens[1]);
+                    Task<Respond> task = NetworkSender.ping(userIP, tokens.get(1));
                     task.setOnSucceeded(event -> output.appendText(task.getValue().getMessage() + "\n"));
                     task.setOnFailed(event -> output.appendText("Failed to ping user: " + task.getException().getMessage() + "\n"));
                     Thread t = new Thread(task);
@@ -68,12 +80,12 @@ public class MainController {
                     return "Error while getting userIP from username";
                 }
             case "discover":
-                if (tokens.length == 1) return "Not enough parameters";
+                if (tokens.size() == 1) return "Not enough parameters";
                 try {
-                    String userIP = database.getUserIP(tokens[1]);
+                    String userIP = database.getUserIP(tokens.get(1));
                     if (userIP == null) return "Username does not exist";
                     ArrayList<ClientFileData> fileList = new ArrayList<>();
-                    Task<Respond> task = NetworkSender.discover(userIP, tokens[1], fileList);
+                    Task<Respond> task = NetworkSender.discover(userIP, tokens.get(1), fileList);
                     task.setOnSucceeded(event -> {
                         if (task.getValue().isSuccess()) {
                             output.appendText("Discover successful, returned file list:\n");
@@ -81,7 +93,7 @@ public class MainController {
                                 output.appendText(file.getName() + " " + file.getSize() + " " + file.getDescription() + " " + file.getFileLocation() + "\n");
                             }
                             try {
-                                database.checkFile(tokens[1], fileList);
+                                database.checkFile(tokens.get(1), fileList);
                             } catch (SQLException e) {
                                 output.appendText("Failed to update database\n");
                             }
@@ -103,6 +115,25 @@ public class MainController {
             default:
                 return "Invalid command";
         }
+    }
+    public static ArrayList<String> splitTokens(String input) {
+        ArrayList<String> tokens = new ArrayList<>();
+
+        // Regular expression to match tokens with or without double quotes
+        Pattern pattern = Pattern.compile("([^\"]\\S*|\".+?\")\\s*");
+        Matcher matcher = pattern.matcher(input);
+
+        while (matcher.find()) {
+            String token = matcher.group(1);
+
+            // Remove double quotes if present
+            if (token.startsWith("\"") && token.endsWith("\"")) {
+                token = token.substring(1, token.length() - 1);
+            }
+
+            tokens.add(token);
+        }
+        return tokens;
     }
     public void onClose() throws SQLException, IOException {
         if (database != null) database.close();
