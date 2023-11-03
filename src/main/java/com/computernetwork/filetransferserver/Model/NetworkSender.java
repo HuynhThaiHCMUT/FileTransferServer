@@ -9,24 +9,24 @@ import java.net.*;
 import java.util.ArrayList;
 
 public class NetworkSender {
-    public static Task<Respond> ping(String userIP, String username) {
+    public static Task<Response> ping(String userIP, String username) {
         return new Task<>() {
             @Override
-            protected Respond call() throws Exception {
+            protected Response call() throws Exception {
                 return blockingPing(userIP, username);
             }
         };
     }
-    public static Task<Respond> discover(String userIP, String username, ArrayList<ClientFileData> fileList) {
+    public static Task<Response> discover(String userIP, String username, ArrayList<ClientFileData> fileList) {
         return new Task<>() {
             @Override
-            protected Respond call() throws Exception {
+            protected Response call() throws Exception {
                 return blockingDiscover(userIP, username, fileList);
             }
         };
     }
 
-    public static Respond blockingPing(String userIP, String username) throws IOException {
+    public static Response blockingPing(String userIP, String username) throws IOException {
         Socket socket = new Socket(userIP, 4041);
         DataInputStream istream = new DataInputStream(socket.getInputStream());
         DataOutputStream ostream = new DataOutputStream(socket.getOutputStream());
@@ -38,25 +38,25 @@ public class NetworkSender {
             ostream.writeUTF(username);
 
             short respondCode = istream.readShort();
-            Respond respond = new Respond(false, null);
+            Response response = new Response(false, null);
             if (respondCode == 200) {
-                respond.setSuccess(true);
-                respond.setMessage("Client is online");
+                response.setSuccess(true);
+                response.setMessage("Client is online");
             } else if (respondCode == 401) {
-                respond.setMessage(username + "doesn't match with " + userIP);
+                response.setMessage(username + "doesn't match with " + userIP);
             } else{
-                respond.setMessage("Invalid respond code: " + respondCode);
+                response.setMessage("Invalid response code: " + respondCode);
             }
 
             socket.close();
-            return respond;
+            return response;
         } catch (SocketTimeoutException e) {
             socket.close();
             throw new SocketTimeoutException("Request timed out");
         }
     }
 
-    public static Respond blockingDiscover(String userIP, String username, ArrayList<ClientFileData> returnedFileList) throws IOException {
+    public static Response blockingDiscover(String userIP, String username, ArrayList<ClientFileData> returnedFileList) throws IOException {
         Socket socket = new Socket(userIP, 4041);
         DataInputStream istream = new DataInputStream(socket.getInputStream());
         DataOutputStream ostream = new DataOutputStream(socket.getOutputStream());
@@ -68,10 +68,10 @@ public class NetworkSender {
             ostream.writeUTF(username);
 
             short respondCode = istream.readShort();
-            Respond respond = new Respond(false, null);
+            Response response = new Response(false, null);
             if (respondCode == 200) {
-                respond.setSuccess(true);
-                respond.setMessage("Discover successful");
+                response.setSuccess(true);
+                response.setMessage("Discover successful");
                 short fileCount = istream.readShort();
 
                 long fileSize;
@@ -89,12 +89,12 @@ public class NetworkSender {
                     returnedFileList.add(file);
                 }
             } else if (respondCode == 401) {
-                respond.setMessage(username + "doesn't match with " + userIP);
+                response.setMessage(username + "doesn't match with " + userIP);
             } else{
-                respond.setMessage("Invalid respond code: " + respondCode);
+                response.setMessage("Invalid response code: " + respondCode);
             }
             socket.close();
-            return respond;
+            return response;
         } catch (SocketTimeoutException e) {
             socket.close();
             throw new SocketTimeoutException("Request timed out");

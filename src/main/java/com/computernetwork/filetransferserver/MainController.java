@@ -55,21 +55,25 @@ public class MainController {
                 return """
                         Command format: command "parameter1" "parameter2" ...
                         List of command:
-                        start: start the server
-                        stop: stop the server
-                        ping "hostname": check if the host with hostname is online
-                        discover "hostname": check the local files of host hostname""";
+                        > start: start the server
+                        > stop: stop the server
+                        > clear: clear the command-line output
+                        > ping "hostname": check if the host with hostname is online
+                        > discover "hostname": check the local files of host hostname""";
             case "start":
                 if (listener.isStarted()) return "Server already started";
                 listener.start();
                 return "Starting server...";
+            case "clear":
+                output.clear();
+                return null;
             case "ping":
                 if (tokens.size() == 1) return "Not enough parameters";
                 try {
                     String userIP = database.getUserIP(tokens.get(1));
                     if (userIP == null) return "Username does not exist";
                     output.appendText("Pinging " + userIP + "\n");
-                    Task<Respond> task = NetworkSender.ping(userIP, tokens.get(1));
+                    Task<Response> task = NetworkSender.ping(userIP, tokens.get(1));
                     task.setOnSucceeded(event -> output.appendText(task.getValue().getMessage() + "\n"));
                     task.setOnFailed(event -> output.appendText("Failed to ping user: " + task.getException().getMessage() + "\n"));
                     Thread t = new Thread(task);
@@ -85,7 +89,7 @@ public class MainController {
                     String userIP = database.getUserIP(tokens.get(1));
                     if (userIP == null) return "Username does not exist";
                     ArrayList<ClientFileData> fileList = new ArrayList<>();
-                    Task<Respond> task = NetworkSender.discover(userIP, tokens.get(1), fileList);
+                    Task<Response> task = NetworkSender.discover(userIP, tokens.get(1), fileList);
                     task.setOnSucceeded(event -> {
                         if (task.getValue().isSuccess()) {
                             output.appendText("Discover successful, returned file list:\n");

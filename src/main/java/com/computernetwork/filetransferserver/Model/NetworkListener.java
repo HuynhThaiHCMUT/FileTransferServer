@@ -148,15 +148,15 @@ public class NetworkListener {
                     for (ServerFileData file: fileArray) {
                         String userIP = database.getUserIP(file.getOwner());
                         if (userIP != null) {
-                            Respond respond;
+                            Response response;
                             try {
-                                respond = NetworkSender.blockingPing(userIP, username);
+                                response = NetworkSender.blockingPing(userIP, file.getOwner());
                             } catch (IOException e) {
-                                respond = new Respond(false, null);
+                                response = new Response(false, null);
                             }
                             ostream.writeUTF(file.getOwner());
                             ostream.writeUTF(userIP);
-                            ostream.writeBoolean(respond.isSuccess());
+                            ostream.writeBoolean(response.isSuccess());
                             ostream.writeLong(file.getSize());
                             ostream.writeUTF(file.getName());
                             ostream.writeUTF(file.getDescription());
@@ -177,15 +177,15 @@ public class NetworkListener {
                     ostream.writeShort(200);
                     ArrayList<ClientFileData> fileList = new ArrayList<>();
                     try {
-                        Respond respond = NetworkSender.blockingDiscover(userIP, username, fileList);
-                        if (respond.isSuccess()) {
+                        Response response = NetworkSender.blockingDiscover(userIP, username, fileList);
+                        if (response.isSuccess()) {
                             output.appendText("Discover successful, returned file list:\n");
                             for (ClientFileData file: fileList) {
                                 output.appendText(file.getName() + " " + file.getSize() + " " + file.getDescription() + " " + file.getFileLocation() + "\n");
                             }
                             database.checkFile(username, fileList);
                         } else {
-                            output.appendText("Discover failed: " + respond.getMessage() + "\n");
+                            output.appendText("Discover failed: " + response.getMessage() + "\n");
                         }
                     } catch (IOException e) {
                         output.appendText("Discover failed: " + e.getMessage() + "\n");
