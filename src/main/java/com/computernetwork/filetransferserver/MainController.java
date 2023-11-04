@@ -124,14 +124,16 @@ public class MainController {
         ArrayList<String> tokens = new ArrayList<>();
 
         // Regular expression to match tokens with or without double quotes
-        Pattern pattern = Pattern.compile("([^\"]\\S*|\".+?\")\\s*");
+        Pattern pattern = Pattern.compile("([^\"]\\S*|\"*\\S*\")\\s*");
         Matcher matcher = pattern.matcher(input);
 
         while (matcher.find()) {
             String token = matcher.group(1);
 
+            // Special case
+            if (token.equals("\"")) tokens.add("");
             // Remove double quotes if present
-            if (token.startsWith("\"") && token.endsWith("\"")) {
+            else if (token.startsWith("\"") && token.endsWith("\"")) {
                 token = token.substring(1, token.length() - 1);
             }
 
