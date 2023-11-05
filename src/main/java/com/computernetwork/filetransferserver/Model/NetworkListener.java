@@ -166,11 +166,10 @@ public class NetworkListener {
                     return clientIP + " sent a search request with query = " + query + " as " + username + "\n" +
                             "Returned " + fileArray.size() + " search result(s)\n";
                 case 5:
-                    String reportedFileName = istream.readUTF();
                     String userIP = database.getUserIP(username);
                     if (userIP == null) {
                         ostream.writeShort(401);
-                        return clientIP + " sent a report missing request: " + username + " is missing file " + reportedFileName + "\n" +
+                        return clientIP + " sent an update file request for: " + username + "\n" +
                                 "Invalid request, username does not exist\n";
                     }
 
@@ -190,7 +189,7 @@ public class NetworkListener {
                     } catch (IOException e) {
                         output.appendText("Discover failed: " + e.getMessage() + "\n");
                     }
-                    return clientIP + " sent a report missing request: " + username + " is missing file " + reportedFileName + "\n" +
+                    return clientIP + " sent a update file request for: " + username + "\n" +
                             "Sending a discover request, to " + userIP +"\n";
                 default:
                     ostream.writeShort(400);

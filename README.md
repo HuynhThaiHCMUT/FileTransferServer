@@ -99,9 +99,9 @@ Link dự án:
 <a id="prerequisites"></a>
 ### Điều kiện
 
-Để sử dụng ứng dụng này, bạn cần cài đặt trước ngôn ngữ Java phiên bản mới nhất.
+Hiện tại, ứng dụng chỉ có bản tập tin thực thi trên nền tảng Windows
 
-Cài đặt Java tại đây: [Java Downloads](https://www.oracle.com/java/technologies/downloads/).
+Source code của ứng dụng được phát triển sử dụng JDK 17 của Bellsoft Liberica và được xây dựng bằng Apache Maven
 
 <a id="installation"></a>
 ### Cài đặt
@@ -134,25 +134,21 @@ Cài đặt Java tại đây: [Java Downloads](https://www.oracle.com/java/techn
 
 Ứng dụng phía Server này cung cấp giao diện CLI với các lệnh sau:
 
-| Cú pháp | Chức năng | Mô tả | Ví dụ |
-|-|-|-|-|
-| `help`  | Trợ giúp | Hiển thị danh sách các lệnh có sẵn cùng với cú pháp và cách sử dụng, dùng trong trường hợp bạn quên | | |
-| `start` | Khởi động Network Listener    | Lệnh để test | |
-| `stop`  | Tạm dừng Network Listener     | Lệnh để test | |
-| `clear` | Xóa toàn bộ nội dung terminal | Terminal sẽ được reset lại như ban đầu | |
-| `ping <hostname>` | Kiểm tra trạng thái của Client | Thay `<hostname>` bằng username của Client cần kiểm tra | `ping phuongngo` |
-| `discover <hostname>` | Xem danh sách file đã đăng của Client | Thay `<hostname>` bằng username của Client cần kiểm tra | `discover Thai` |
+| Cú pháp | Chức năng                             | Mô tả                                                                                               | Ví dụ |
+|-|---------------------------------------|-----------------------------------------------------------------------------------------------------|-|
+| `help`  | Trợ giúp                              | Hiển thị danh sách các lệnh có sẵn cùng với cú pháp và cách sử dụng, dùng trong trường hợp bạn quên | | |
+| `start` | Khởi động Network Server              | Lệnh để khởi động server, bắt đầu nhận các yêu cầu từ client                                        | |
+| `stop`  | Tạm dừng Network Server               | Lệnh để tạm dừng server, không xử lí các yêu cầu từ client                                          | |
+| `clear` | Xóa toàn bộ nội dung terminal         | Màn hình hiển thị của Terminal sẽ được reset lại như ban đầu                                        | |
+| `ping <hostname>` | Kiểm tra trạng thái của Client        | Thay `<hostname>` bằng username của Client cần kiểm tra                                             | `ping phuongngo` |
+| `discover <hostname>` | Xem danh sách file đã đăng của Client | Thay `<hostname>` bằng username của Client cần kiểm tra                                             | `discover Thai` |
 
 <a id="errors"></a>
 
 ### Lỗi có thể xảy ra khi sử dụng
 
-<!-- TODO: add error cases -->
-...
-
-..
-
-.
+- Connection error: Các lỗi có thể xảy ra khi tạo đường truyền kết nối đến client
+- Database error: Các lỗi có thể xảy ra do cơ sở dữ liệu
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -167,9 +163,9 @@ Cài đặt Java tại đây: [Java Downloads](https://www.oracle.com/java/techn
 
 Thành viên của dự án:
 
-- Đinh Huỳnh Thái
-- Lê Thanh Tùng 
-- Nguyễn Thị Xuân Hoa
+- Đinh Huỳnh Thái - thai.dinhhuynh@hcmut.edu.vn
+- Lê Thanh Tùng - thanhtunga52021@gmail.com
+- Nguyễn Thị Xuân Hoa - nguyenhoacujut2003@gmail.com
 - Ngô Văn Phương - phuong.ngo0320@hcmut.edu.vn
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -184,6 +180,6 @@ Thành viên của dự án:
 ## Tài liệu tham khảo
 
 * Kurose, J. and Ross, K. (2022). _Computer Networking: a top-down approach, 8th edition_. Boston: Pearson Education Limited.
-* [JDK21 Documentation](https://docs.oracle.com/en/java/javase/21)
+* [JavaFX Documentation](https://openjfx.io)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
