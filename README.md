@@ -8,7 +8,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/HuynhThaiHCMUT/FileTransfer">
-    <img src="hcmut.png" alt="Logo" width="80" height="80">
+    <img src="hcmut.png" alt="Logo" width="160" height="160">
   </a>
 
 <h3 align="center">File Sharing Application (Server)</h3>
@@ -19,11 +19,11 @@
     <a href="#getting-started"><strong>Xem hướng dẫn »</strong></a>
     <br />
     <br />
-    <a href="#">Tải xuống</a>
+    <a href="https://github.com/HuynhThaiHCMUT/FileTransferServer/releases">Tải xuống</a>
     ·
-    <a href="#">Báo lỗi</a>
+    <a href="mailto:phuong.ngo0320@hcmut.edu.vn">Báo lỗi</a>
     ·
-    <a href="#">Đề xuất tính năng</a>
+    <a href="mailto:phuong.ngo0320@hcmut.edu.vn">Đề xuất tính năng</a>
   </p>
 </div>
 
@@ -46,7 +46,14 @@
         <li><a href="#installation">Cài đặt</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Hướng dẫn sử dụng</a></li>
+    <li>
+      <a href="#usage">Hướng dẫn sử dụng</a>
+      <ul>
+        <li><a href="#notes">Một số lưu ý</a></li>
+        <li><a href="#functions">Thao tác trong ứng dụng</a></li>
+        <li><a href="#errors">Lỗi có thể xảy ra khi sử dụng</a></li>
+      </ul>
+    </li>
     <li><a href="#contact">Liên hệ</a></li>
     <li><a href="#acknowledgments">Tài liệu tham khảo</a></li>
   </ol>
@@ -100,10 +107,9 @@ Cài đặt Java tại đây: [Java Downloads](https://www.oracle.com/java/techn
 ### Cài đặt
 
 
-1. Truy cập đường dẫn sau: [Download FileTransferServer](#) <!-- TODO: add installation location -->
-2. Tải về file nén "Source code"
-3. Giải nén 
-4. Nhấn đúp vào FileTransferServer.exe để bắt đầu sử dụng
+1. Truy cập đường dẫn sau: [Download FileTransferServer](https://github.com/HuynhThaiHCMUT/FileTransferServer/releases)
+2. Tải về file `FileTransferServer.exe` 
+3. Nhấn đúp vào `FileTransferServer.exe` để bắt đầu sử dụng
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -116,9 +122,13 @@ Cài đặt Java tại đây: [Java Downloads](https://www.oracle.com/java/techn
 
 ## Hướng dẫn sử dụng
 
+<a id="notes"></a>
+
 ### Một số lưu ý
 
 - Để sử dụng ứng dụng này, bạn cần có một kết nối internet ổn định.
+
+<a id="functions"></a>
 
 ### Thao tác trong ứng dụng
 
@@ -132,6 +142,8 @@ Cài đặt Java tại đây: [Java Downloads](https://www.oracle.com/java/techn
 | `clear` | Xóa toàn bộ nội dung terminal | Terminal sẽ được reset lại như ban đầu | |
 | `ping <hostname>` | Kiểm tra trạng thái của Client | Thay `<hostname>` bằng username của Client cần kiểm tra | `ping phuongngo` |
 | `discover <hostname>` | Xem danh sách file đã đăng của Client | Thay `<hostname>` bằng username của Client cần kiểm tra | `discover Thai` |
+
+<a id="errors"></a>
 
 ### Lỗi có thể xảy ra khi sử dụng
 
@@ -171,7 +183,7 @@ Thành viên của dự án:
 
 ## Tài liệu tham khảo
 
-* Kurose, J. and Ross, K. (2017). _Computer Networking: a top-down approach, 7th edition_. Boston: Pearson Education Limited.
+* Kurose, J. and Ross, K. (2022). _Computer Networking: a top-down approach, 8th edition_. Boston: Pearson Education Limited.
 * [JDK21 Documentation](https://docs.oracle.com/en/java/javase/21)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
