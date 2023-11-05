@@ -120,24 +120,27 @@ public class MainController {
                 return "Invalid command";
         }
     }
-    public static ArrayList<String> splitTokens(String input) {
+    public ArrayList<String> splitTokens(String input) {
         ArrayList<String> tokens = new ArrayList<>();
 
         // Regular expression to match tokens with or without double quotes
-        Pattern pattern = Pattern.compile("([^\"]\\S*|\"*\\S*\")\\s*");
+        Pattern pattern = Pattern.compile("([^\"]\\S*[^\"]|\"([^\"]*)\")\\s*");
         Matcher matcher = pattern.matcher(input);
 
         while (matcher.find()) {
             String token = matcher.group(1);
 
-            // Special case
-            if (token.equals("\"")) tokens.add("");
+            // Trim token
+            token = token.trim();
             // Remove double quotes if present
-            else if (token.startsWith("\"") && token.endsWith("\"")) {
+            if (token.startsWith("\"") && token.endsWith("\"")) {
                 token = token.substring(1, token.length() - 1);
             }
 
             tokens.add(token);
+        }
+        for (String s: tokens) {
+            output.appendText(s + "\n");
         }
         return tokens;
     }
